@@ -68,7 +68,7 @@ df_core <- df_hit_counts %>%
   
   mutate(per_core_genes = (n_core_genes / n_genes)*100) 
 
-write.csv(df_core, '~/RumenCampylobacter2022/Figures/Fig1_AB/intermediate_tables/all_genomes_core_nucl.csv')
+write.csv(df_core, '~/RumenCampylobacter2022/Figures/Fig2_AB/intermediate_tables/all_genomes_core_nucl.csv')
 
 df_pop_specific <- df_hit_counts %>%
   
@@ -86,7 +86,7 @@ df_pop_specific <- df_hit_counts %>%
   
   mutate(per_pop_specific_genes = (n_pop_specific_genes / n_genes)*100) 
 
-write.csv(df_pop_specific, '~/RumenCampylobacter2022/Figures/Fig1_AB/intermediate_tables/all_genomes_pop_specific_nucl.csv')
+write.csv(df_pop_specific, '~/RumenCampylobacter2022/Figures/Fig2_AB/intermediate_tables/all_genomes_pop_specific_nucl.csv')
 
 df_flex <- df_hit_counts %>%
   
@@ -104,4 +104,4 @@ df_flex <- df_hit_counts %>%
   
   mutate(per_flex_genes = (n_flex_genes / n_genes)*100)
 
-write.csv(df_flex, '~/RumenCampylobacter2022/Figures/Fig1_AB/intermediate_tables/all_genomes_flex_nucl.csv')
+write.csv(df_flex, '~/RumenCampylobacter2022/Figures/Fig2_AB/intermediate_tables/all_genomes_flex_nucl.csv')
