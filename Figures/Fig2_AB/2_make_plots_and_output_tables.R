@@ -2,20 +2,20 @@ library(ggplot2)
 library(tidyverse)
 library(ggbreak) 
 
-core <- read.csv('~/RumenCampylobacter2022/Figures/Fig1_AB/intermediate_tables/all_genomes_core_nucl.csv') %>%
+core <- read.csv('~/RumenCampylobacter2022/Figures/Fig2_AB/intermediate_tables/all_genomes_core_nucl.csv') %>%
   select(gene1) %>%
   mutate(gene1 = as.character(gene1)) %>%
   separate(gene1, into=c("label", "gene_num"), sep = "_", remove = FALSE) %>%
   mutate(gene_num = as.numeric(gene_num)) %>%
   mutate(class = "core")
 
-pop_specific <- read.csv('~/RumenCampylobacter2022/Figures/Fig1_AB/intermediate_tables/all_genomes_pop_specific_nucl.csv') %>%
+pop_specific <- read.csv('~/RumenCampylobacter2022/Figures/Fig2_AB/intermediate_tables/all_genomes_pop_specific_nucl.csv') %>%
   select(gene1) %>%
   separate(gene1, into=c("label", "gene_num"), sep = "_", remove = FALSE) %>%
   mutate(gene_num = as.numeric(gene_num)) %>%
   mutate(class = "pop_specific")
 
-flex <- read.csv('~/RumenCampylobacter2022/Figures/Fig1_AB/intermediate_tables/all_genomes_flex_nucl.csv') %>%
+flex <- read.csv('~/RumenCampylobacter2022/Figures/Fig2_AB/intermediate_tables/all_genomes_flex_nucl.csv') %>%
   select(gene1) %>%
   mutate(gene1 = as.character(gene1)) %>%
   separate(gene1, into=c("label", "gene_num"), sep = "_", remove = FALSE) %>%
@@ -126,7 +126,7 @@ df_plot$pop_specificY <- as.numeric(df_plot$pop_specificY)
 
 ### PLOT
 
-pdf("~/RumenCampylobacter2022/Figures/Fig1_AB/output/fig1_A.pdf", width=9, height=4.5)
+pdf("~/RumenCampylobacter2022/Figures/Fig2_AB/output/fig2_A.pdf", width=9, height=4.5)
 
 ggplot(df_plot, aes(x=gene1_num, y=gene2_num_adjust)) +
   geom_point(aes(colour=pident), shape = 108, size = 2) + 
@@ -170,7 +170,7 @@ scaleFUN <- function(x) sprintf("%.0f", x)
 
 ### PLOT
 
-pdf("~/RumenCampylobacter2022/Figures/Fig1_AB/output/fig1_B.pdf", width=6, height=6)
+pdf("~/RumenCampylobacter2022/Figures/Fig2_AB/output/fig2_B.pdf", width=6, height=6)
 
 ggplot(gene_categories_summary, aes(x=class, y=total_class, fill=genome)) + 
   
@@ -187,12 +187,12 @@ dev.off()
 pop_specific_annotations <- read.csv("~/RumenCampylobacter2022/Processing/genomes/output/compiled_annotations.csv") %>%
   filter(locus_tag %in% pop_specific$gene1) 
 
-write.csv(pop_specific_annotations, "~/RumenCampylobacter2022/Figures/Fig1_AB/output/pop_specific_annotations_total.csv")
+write.csv(pop_specific_annotations, "~/RumenCampylobacter2022/Figures/Fig2_AB/output/pop_specific_annotations_total.csv")
 
 pop_specific_annotations_noHyp <- pop_specific_annotations %>%
   filter(!(product == "hypothetical protein" & product2 == "hypothetical protein" & product3 == "hypothetical protein"))
 
-write.csv(pop_specific_annotations_noHyp, "~/RumenCampylobacter2022/Figures/Fig1_AB/output/pop_specific_annotations_no_hypothetical.csv")
+write.csv(pop_specific_annotations_noHyp, "~/RumenCampylobacter2022/Figures/Fig2_AB/output/pop_specific_annotations_no_hypothetical.csv")
 
 pop_specific_annotations$product3 <- gsub("putative protein", "hypothetical protein", pop_specific_annotations$product3)
 
@@ -211,4 +211,4 @@ annotation_count_summary <- pop_specific_annotations %>%
   
   mutate(per = (count / total)*100)
 
-write.csv(annotation_count_summary, "~/RumenCampylobacter2022/Figures/Fig1_AB/output/annotation_count_summary.csv")
+write.csv(annotation_count_summary, "~/RumenCampylobacter2022/Figures/Fig2_AB/output/annotation_count_summary.csv")
