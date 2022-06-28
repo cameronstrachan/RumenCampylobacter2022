@@ -1,15 +1,15 @@
 library(tidyverse)
 
-class <- read.delim("output/gtdbtk.bac120.summary.tsv")[,1:2]
+class <- read.delim("~/RumenCampylobacter2022/Processing/metagenomes/output/gtdbtk.bac120.summary.tsv")[,1:2]
 colnames(class)[1] <- "bin_id"
 
-checkm <- read_table2("output/checkM.txt", col_names = FALSE, skip = 3, comment = "---")[,c(1,13:15)]
+checkm <- read_table2("~/RumenCampylobacter2022/Processing/metagenomes/output/checkM.txt", col_names = FALSE, skip = 3, comment = "---")[,c(1,13:15)]
 colnames(checkm) <- c("bin_id", "completeness", "contamination", "strain_heterogeneity")
 
-map <- read.csv("output/bin_contig_map.csv", header=FALSE)
+map <- read.csv("~/RumenCampylobacter2022/Processing/metagenomes/output/bin_contig_map.csv", header=FALSE)
 colnames(map) <- c("bin_id", "contig_id")
 
-read_count_files <- list.files('output/mapping/', pattern = "bins_readcounts.txt")
+read_count_files <- list.files('~/RumenCampylobacter2022/Processing/metagenomes/output/mapping/', pattern = "bins_readcounts.txt")
 df_list <- list()
 i <- 1
 
@@ -53,7 +53,7 @@ summary <- compiled %>%
   filter(contamination < 10) %>%
   filter(completeness > 50)
 
-pdf(file = "plots/bin_ab.pdf",   # The directory you want to save the file in
+pdf(file = "~/RumenCampylobacter2022/Figures/Fig1_AB/output/fig1_B.pdf",   # The directory you want to save the file in
     width = 7, # The width of the plot in inches
     height = 9)
 

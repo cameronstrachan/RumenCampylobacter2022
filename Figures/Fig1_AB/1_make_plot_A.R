@@ -1,7 +1,7 @@
 library(tidyverse)
 library(rRDP)
 
-counts <- read.delim("output/asv-counts-merged.txt", header=FALSE)
+counts <- read.delim("~/RumenCampylobacter2022/Processing/amplicons/output/asv-counts-merged.txt", header=FALSE)
 counts <- counts[-1,]
 counts[] <- lapply(counts, as.character)
 names(counts) <- counts[1,]
@@ -18,7 +18,7 @@ counts_long_norm <- gather(counts, ID, count, -asv) %>%
 
 
 
-seq <- readDNAStringSet("output/asv-seqs-merged.fasta")
+seq <- readDNAStringSet("~/RumenCampylobacter2022/Processing/amplicons/output/asv-seqs-merged.fasta")
 pred <- predict(rdp(), seq)
 conf <- attr(pred, "confidence")
 
@@ -49,7 +49,7 @@ counts_long_norm_taxa_select <- inner_join(counts_long_norm, taxa_select) %>%
   unite(asv_class, c("asv_sub", "phylum", "class",  "order", "family"), sep = "_", remove=FALSE)
 
 
-pdf(file = "plots/top_asv.pdf", width = 7, height = 10)
+pdf(file = "~/RumenCampylobacter2022/Figures/Fig1_AB/output/fig1_A.pdf", width = 7, height = 10)
 
 ggplot(counts_long_norm_taxa_select, aes(x=reorder(asv_class, asv_med), y=counts_normalized)) + 
   geom_boxplot(outlier.shape = NA) + 
