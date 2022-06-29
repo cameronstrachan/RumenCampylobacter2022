@@ -6,18 +6,26 @@ colnames(pops)[1] <- "genome2"
 
 campy_genomes <- pops$genome2
 
-reciprocal_best_hits_nucl <- read_csv("~/RumenCampylobacter2022/Processing/genomes/output/reciprocal_best_hits_nucl.csv", col_types = cols(.default = "c")) %>% 
-  filter(genome1 %in% campy_genomes) %>% 
-  filter(genome2 %in% campy_genomes) 
+# reduce the output table size of the all against all blast results so that I can upload it to github.
+
+# reciprocal_best_hits_nucl <- read_csv("~/RumenCampylobacter2022/Processing/genomes/output/reciprocal_best_hits_nucl.csv", col_types = cols(.default = "c")) %>% 
+#   filter(genome1 %in% campy_genomes) %>% 
+#   filter(genome2 %in% campy_genomes)  %>%
+#   filter(genome1 == "131980_spades_pomoxis_polished_min2000") %>%
+#   filter(genome2 == "JMF18_spades_pomoxis_polished_min2000") %>%
+#   filter(genome1 != genome2)
+# 
+# write.csv(reciprocal_best_hits_nucl, "~/RumenCampylobacter2022/Processing/genomes/output/reciprocal_best_hits_nucl_red.csv", row.names = FALSE)
+
+reciprocal_best_hits_nucl <- read_csv("~/RumenCampylobacter2022/Processing/genomes/output/reciprocal_best_hits_nucl_red.csv", col_types = cols(.default = "c"))
 
 reciprocal_best_hits_nucl$pident_nucl <- as.numeric(reciprocal_best_hits_nucl$pident_nucl)
 reciprocal_best_hits_nucl$palign_nucl <- as.numeric(reciprocal_best_hits_nucl$palign_nucl)
 
 rep_rbh_nucl <- reciprocal_best_hits_nucl %>%
-  filter(genome1 == "131980_spades_pomoxis_polished_min2000") %>%
-  filter(genome2 == "JMF18_spades_pomoxis_polished_min2000") %>%
-  filter(genome1 != genome2) %>%
   filter(palign_nucl >= 80) 
+
+
 
 hist(rep_rbh_nucl$pident_nucl, breaks = 100)
 
@@ -115,15 +123,4 @@ colnames(annotations)[2] <- "ID"
 
 summary_annotations <- summary %>%
   filter(direction != "stable") %>%
-  inner_join(annotations) #%>%
-filter(product3 != "hypothetical protein") %>%
-  arrange(log2FoldChange) #%>%
-select(ID, direction, gene, product3) %>%
-  distinct()
-
-summary_annotations$product3 <- strtrim(summary_annotations$product3, 40)
-
-#summary_annotations_no_ribosomal_proteins <- summary_annotations[!(grepl("ribosom", summary_annotations$product3)),]
-
-table_print <- as.data.frame(summary_annotations)
-rownames(table_print) <- NULL
+  inner_join(annotations) 
