@@ -1,0 +1,189 @@
+library(tidyverse)
+library(viridis)
+
+pops <- read.csv("~/RumenCampylobacter2022/METAdata/population_classification.csv")
+colnames(pops)[1] <- "genome2"
+
+campy_genomes <- pops$genome2
+
+reciprocal_best_hits_nucl <- read_csv("~/RumenCampylobacter2022/Processing/genomes/output/reciprocal_best_hits_nucl.csv", col_types = cols(.default = "c")) %>% 
+  filter(genome1 %in% campy_genomes) %>% 
+  filter(genome2 %in% campy_genomes) 
+
+reciprocal_best_hits_nucl$pident_nucl <- as.numeric(reciprocal_best_hits_nucl$pident_nucl)
+reciprocal_best_hits_nucl$palign_nucl <- as.numeric(reciprocal_best_hits_nucl$palign_nucl)
+
+rep_rbh_nucl <- reciprocal_best_hits_nucl %>%
+  filter(genome1 == "131980_spades_pomoxis_polished_min2000") %>%
+  filter(genome2 == "JMF18_spades_pomoxis_polished_min2000") %>%
+  filter(genome1 != genome2) %>%
+  filter(palign_nucl >= 80) 
+
+hist(rep_rbh_nucl$pident_nucl, breaks = 100)
+
+rep_rbh_nucl <- rep_rbh_nucl %>%
+  filter(pident_nucl <= 97.5)
+
+rep_rbh_nucl$gene_num_rbh <- seq(1, nrow(rep_rbh_nucl), 1)
+
+rep_rbh_nucl_num <- rep_rbh_nucl %>%
+  select(gene1, gene2, gene_num_rbh) %>%
+  gather(rm, ID, -gene_num_rbh) %>%
+  select(-rm)
+
+transcriptome_map <- read_csv("~/RumenCampylobacter2022/METAdata/sample_mapping.csv", col_types = cols(.default = "c"))
+
+expression_counts <- read.csv("~/RumenCampylobacter2022/Processing/metatranscriptomes/output/compiled_counts_clones.csv")  %>%
+  
+  select(-gene, -product) %>%
+  separate(reads, into = c("sample", "type"), sep = "\\.R1\\.") %>%
+  
+  filter(type != "metagenome") %>%
+  
+  inner_join(transcriptome_map) %>%
+  
+  inner_join(rep_rbh_nucl_num) %>%
+  
+  separate(ID, into = c("genome"), sep = "_") %>%
+  
+  unite(genome_sample, c("genome", "sample"), sep = "_") %>%
+  
+  select(-type, -treatment) %>%
+  
+  spread(genome_sample, count)
+
+library(DESeq2)
+
+cts <- as.matrix(expression_counts[,2:13])
+rownames(cts) <- expression_counts$gene_num_rbh
+
+coldata = matrix(c("131980_spades_pomoxis_polished_min2000", "131980_spades_pomoxis_polished_min2000", "131980_spades_pomoxis_polished_min2000", "131980_spades_pomoxis_polished_min2000", "131980_spades_pomoxis_polished_min2000", "131980_spades_pomoxis_polished_min2000", "JMF18_spades_pomoxis_polished_min2000", "JMF18_spades_pomoxis_polished_min2000", "JMF18_spades_pomoxis_polished_min2000" , "JMF18_spades_pomoxis_polished_min2000", "JMF18_spades_pomoxis_polished_min2000", "JMF18_spades_pomoxis_polished_min2000"))
+colnames(coldata) <- "genome"
+rownames(coldata) <- c(names(expression_counts)[2:13])
+
+dds <- DESeqDataSetFromMatrix(countData = cts,
+                              colData = coldata,
+                              design= ~ genome)
+
+
+dds <- DESeq(dds)
+resultsNames(dds)
+res <- results(dds)
+deseq <- as.data.frame(res, name="genome_JMF_2102_8_0018_vs_131980_min1000")
+rm(list = c("res", "dds", "cts", "coldata"))
+
+deseq$gene_num_rbh <- rownames(deseq)
+
+deseq <- deseq %>%
+  select(gene_num_rbh, pvalue, padj, log2FoldChange) %>%
+  filter(!(is.na(padj)))
+
+rep_rbh_nucl_num$gene_num_rbh <- as.character(rep_rbh_nucl_num$gene_num_rbh)
+
+summary <- deseq %>%
+  inner_join(rep_rbh_nucl_num) %>%
+  mutate(neglog10pAdj = -log10(padj)) %>%
+  mutate(direction = if_else(neglog10pAdj > 5 & log2FoldChange >= 1.5, "S39", 
+                             if_else(neglog10pAdj > 5 & log2FoldChange <= -1.5, "22B", "stable")))
+
+ggplot(data = summary, 
+       aes(x = log2FoldChange, 
+           y = neglog10pAdj, 
+           colour = direction)) +
+  
+  scale_color_manual(values=c("blue", "red", "grey")) +
+  
+  geom_point(alpha=0.4, size=3.5) +
+  
+  geom_vline(xintercept=c(-1.5,1.5),lty=4,col="black",lwd=0.8) +
+  geom_hline(yintercept = 5,lty=4,col="black",lwd=0.8) +
+  
+  labs(x="log2(fold change)",
+       y="-log10 (adj.p-value)",
+       title="Differential expression")  +
+  theme_bw()+
+  theme(plot.title = element_text(hjust = 0.5), 
+        legend.position="right", 
+        legend.title = element_blank())
+
+library(printr)
+
+annotations <- read.csv("~/RumenCampylobacter2022/Processing/genomes/output/compiled_annotations.csv") 
+colnames(annotations)[2] <- "ID"
+
+summary_annotations <- summary %>%
+  filter(direction != "stable") %>%
+  inner_join(annotations) #%>%
+filter(product3 != "hypothetical protein") %>%
+  arrange(log2FoldChange) #%>%
+select(ID, direction, gene, product3) %>%
+  distinct()
+
+summary_annotations$product3 <- strtrim(summary_annotations$product3, 40)
+
+#summary_annotations_no_ribosomal_proteins <- summary_annotations[!(grepl("ribosom", summary_annotations$product3)),]
+
+
+table_print <- as.data.frame(summary_annotations)
+rownames(table_print) <- NULL
+
+table_print
+
+select_genes <- c("HKMHBKFO_00546", "KHAFFMAE_00560")
+
+expression_counts_select <- read.csv("~/RumenCampylobacter2022/Processing/metatranscriptomes/output/compiled_counts_clones.csv")  %>%
+  
+  
+  
+  select(-gene, -product) %>%
+  
+  separate(reads, into = c("sample", "type"), sep = "\\.R1\\.") %>%
+  
+  inner_join(rep_rbh_nucl_num) %>%
+  
+  filter(ID %in% select_genes) %>%
+  
+  separate(ID, into = c("genome", "gene_num"), sep = "_", remove = FALSE) %>%
+  
+  inner_join(summary_annotations) %>%
+  
+  unite(x_label, c("gene_num_rbh", "product3"), sep = "_", remove =FALSE)
+
+expression_counts_select$genome <- gsub("HKMHBKFO", "22B", expression_counts_select$genome)
+expression_counts_select$genome <- gsub("KHAFFMAE", "S39", expression_counts_select$genome)
+
+#ggplot(expression_counts_select , aes(x=x_label, y=count, colour=genome)) + 
+#  geom_jitter(position=position_jitter(width=0.1, height=0)) +
+#  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+#        axis.title.x = element_blank()) +
+#  facet_grid(. ~ type)
+
+select_genes <- c("HKMHBKFO_01375", "KHAFFMAE_01264", "HKMHBKFO_01373", "KHAFFMAE_01267")
+
+expression_counts_select <- read.csv("~/RumenCampylobacter2022/Processing/metatranscriptomes/output/compiled_counts_clones.csv")  %>%
+  
+  
+  
+  select(-gene, -product) %>%
+  
+  separate(reads, into = c("sample", "type"), sep = "\\.R1\\.") %>%
+  
+  inner_join(rep_rbh_nucl_num) %>%
+  
+  filter(ID %in% select_genes) %>%
+  
+  separate(ID, into = c("genome", "gene_num"), sep = "_", remove = FALSE) %>%
+  
+  inner_join(summary_annotations) %>%
+  
+  unite(x_label, c("gene_num_rbh", "product3"), sep = "_", remove =FALSE)
+
+expression_counts_select$genome <- gsub("HKMHBKFO", "22B", expression_counts_select$genome)
+expression_counts_select$genome <- gsub("KHAFFMAE", "S39", expression_counts_select$genome)
+
+ggplot(expression_counts_select , aes(x=x_label, y=count, colour=genome)) + 
+  geom_jitter(position=position_jitter(width=0.1, height=0)) +
+  facet_grid(. ~ type) + 
+  theme_bw()  +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+        axis.title.x = element_blank())
