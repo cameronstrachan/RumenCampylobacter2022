@@ -1,9 +1,9 @@
 library(tidyverse)
 
-qPCR_16s <- read_csv("~/RumenCampylobacter2022/Raw/dPCR_feeding_trial.csv")
-dPCR_pops <- read_csv("~/RumenCampylobacter2022/Raw/qPCR_feeding_trial.csv")
+qPCR_16s <- read_csv("~/RumenCampylobacter2022/PCRdata/dPCR_feeding_trial.csv")
+dPCR_pops <- read_csv("~/RumenCampylobacter2022/PCRdata/qPCR_feeding_trial.csv")
 
-meta <- read.csv("~/RumenCampylobacter2022/MetaData/metadata_feeding_trial.csv")
+meta <- read.csv("~/RumenCampylobacter2022/METAdata/metadata_feeding_trial.csv")
 
 meta_clean <- meta %>%
   
