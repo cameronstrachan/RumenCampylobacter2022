@@ -86,6 +86,8 @@ summary <- deseq %>%
   mutate(direction = if_else(neglog10pAdj > 5 & log2FoldChange >= 1.5, "S39", 
                              if_else(neglog10pAdj > 5 & log2FoldChange <= -1.5, "22B", "stable")))
 
+pdf("~/RumenCampylobacter2022/Figures/Fig4_A/output/fig4_A.pdf", width=9, height=4.5)
+
 ggplot(data = summary, 
        aes(x = log2FoldChange, 
            y = neglog10pAdj, 
@@ -106,7 +108,7 @@ ggplot(data = summary,
         legend.position="right", 
         legend.title = element_blank())
 
-library(printr)
+dev.off()
 
 annotations <- read.csv("~/RumenCampylobacter2022/Processing/genomes/output/compiled_annotations.csv") 
 colnames(annotations)[2] <- "ID"
@@ -123,67 +125,5 @@ summary_annotations$product3 <- strtrim(summary_annotations$product3, 40)
 
 #summary_annotations_no_ribosomal_proteins <- summary_annotations[!(grepl("ribosom", summary_annotations$product3)),]
 
-
 table_print <- as.data.frame(summary_annotations)
 rownames(table_print) <- NULL
-
-table_print
-
-select_genes <- c("HKMHBKFO_00546", "KHAFFMAE_00560")
-
-expression_counts_select <- read.csv("~/RumenCampylobacter2022/Processing/metatranscriptomes/output/compiled_counts_clones.csv")  %>%
-  
-  
-  
-  select(-gene, -product) %>%
-  
-  separate(reads, into = c("sample", "type"), sep = "\\.R1\\.") %>%
-  
-  inner_join(rep_rbh_nucl_num) %>%
-  
-  filter(ID %in% select_genes) %>%
-  
-  separate(ID, into = c("genome", "gene_num"), sep = "_", remove = FALSE) %>%
-  
-  inner_join(summary_annotations) %>%
-  
-  unite(x_label, c("gene_num_rbh", "product3"), sep = "_", remove =FALSE)
-
-expression_counts_select$genome <- gsub("HKMHBKFO", "22B", expression_counts_select$genome)
-expression_counts_select$genome <- gsub("KHAFFMAE", "S39", expression_counts_select$genome)
-
-#ggplot(expression_counts_select , aes(x=x_label, y=count, colour=genome)) + 
-#  geom_jitter(position=position_jitter(width=0.1, height=0)) +
-#  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
-#        axis.title.x = element_blank()) +
-#  facet_grid(. ~ type)
-
-select_genes <- c("HKMHBKFO_01375", "KHAFFMAE_01264", "HKMHBKFO_01373", "KHAFFMAE_01267")
-
-expression_counts_select <- read.csv("~/RumenCampylobacter2022/Processing/metatranscriptomes/output/compiled_counts_clones.csv")  %>%
-  
-  
-  
-  select(-gene, -product) %>%
-  
-  separate(reads, into = c("sample", "type"), sep = "\\.R1\\.") %>%
-  
-  inner_join(rep_rbh_nucl_num) %>%
-  
-  filter(ID %in% select_genes) %>%
-  
-  separate(ID, into = c("genome", "gene_num"), sep = "_", remove = FALSE) %>%
-  
-  inner_join(summary_annotations) %>%
-  
-  unite(x_label, c("gene_num_rbh", "product3"), sep = "_", remove =FALSE)
-
-expression_counts_select$genome <- gsub("HKMHBKFO", "22B", expression_counts_select$genome)
-expression_counts_select$genome <- gsub("KHAFFMAE", "S39", expression_counts_select$genome)
-
-ggplot(expression_counts_select , aes(x=x_label, y=count, colour=genome)) + 
-  geom_jitter(position=position_jitter(width=0.1, height=0)) +
-  facet_grid(. ~ type) + 
-  theme_bw()  +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
-        axis.title.x = element_blank())
