@@ -1,6 +1,6 @@
 library(tidyverse)
 
-compiled <- read.csv("~/RumenCampylobacter2022/Raw/dPCR_in_vitro.csv") %>%
+compiled <- read.csv("~/RumenCampylobacter2022/PCRdata/dPCR_in_vitro.csv") %>%
   group_by(Treatment, Measure, Inoculation) %>%
   mutate(Avg=mean(Copies)) %>%
   mutate(Sd =sd(Copies)) %>%
