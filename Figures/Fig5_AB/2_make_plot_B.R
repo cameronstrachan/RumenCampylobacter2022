@@ -37,7 +37,16 @@ compiled <- full_join(qPCR_16s, dPCR_pops) %>%
   
   mutate(`16S_total_copies` = as.numeric(gsub("No Ct", 0, `16S_total_copies`))) %>%
   separate(ID, into=c("Run", "Day", "Cow"), remove = FALSE) %>%
-  select(-SampleName) 
+  select(-SampleName) %>%
+  
+  group_by(ID, Run, Day, Cow) %>%
+  mutate(S0_copies = mean(S0_copies)) %>%
+  mutate(S1_copies = mean(S1_copies)) %>%
+  mutate(`16S_total_copies` = mean(`16S_total_copies`)) %>%
+  ungroup() %>%
+  distinct()
+  
+  
 
 library(corrplot)
 
@@ -50,14 +59,14 @@ colnames(correlation) <- gsub("_uM_Min", "", names(correlation))
 corr_mat <- cor(correlation)
 corr_mat_testRes = cor.mtest(correlation, conf.level = 0.95)
 
-pdf("~/RumenCampylobacter2022/Figures/Fig5_AB/output/fig5_B.pdf", width=6, height=6)
+pdf("~/RumenCampylobacter2022/Figures/Fig5_AB/output/fig5_B_v2.pdf", width=6, height=6)
 
 corrplot(corr_mat, method="circle", col = colorRampPalette(c("red", "black"))(50),
          type="lower", order="original", 
          addCoef.col = "white", # Add coefficient of correlation
          tl.col="black", tl.srt=45, #Text label color and rotation
          # Combine with significance
-         p.mat = corr_mat_testRes$p, sig.level = 0.01, insig = "pch", 
+         p.mat = corr_mat_testRes$p, sig.level = 0.05, insig = "pch", 
          # hide correlation coefficient on the principal diagonal
          diag=FALSE)
 
