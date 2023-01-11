@@ -29,7 +29,7 @@ order_names <- names(df_all_v_all_wide[,2:ncol(df_all_v_all_wide)])[order]
 df_all_v_all_long$genome1 <- factor(df_all_v_all_long$genome1, levels = order_names)
 df_all_v_all_long$genome2 <- factor(df_all_v_all_long$genome2, levels = order_names)
 
-pdf("~/RumenCampylobacter2022/Figures/SuppFig2/output/supp_fig2.pdf", width=24, height=24)
+pdf("~/RumenCampylobacter2022/Figures/SuppFig4/output/supp_fig4.pdf", width=24, height=24)
 
 ggplot(df_all_v_all_long, aes(genome1, genome2) ) +
   geom_tile(aes(fill = ani)) + 
@@ -46,7 +46,7 @@ ggplot(df_all_v_all_long, aes(genome1, genome2) ) +
 
 dev.off()
 
-pdf("~/RumenCampylobacter2022/Figures/SuppFig2/output/supp_fig2_dendogram.pdf", width=6, height=6)
+pdf("~/RumenCampylobacter2022/Figures/SuppFig4/output/supp_fig4_dendogram.pdf", width=6, height=6)
 
 plot(as.dendrogram(hclust(dist)))
 
