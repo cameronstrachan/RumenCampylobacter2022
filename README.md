@@ -1,5 +1,5 @@
 # RumenCampylobacter2022
-This repository is for the analysis code from the Strachan et al. 2022 paper "Differential carbon utilization enables co-existence of recently speciated Campylobacteraceae in the cow rumen epithelial microbiome"
+This repository is for the analysis code from the Strachan et al. 2024 paper "Differential carbon utilization enables co-existence of recently speciated Campylobacteraceae in the cow rumen epithelial microbiome"
 
 ## Statistical analysis and figure generation
 The code for the analysis of the various output tables can be found in the folder 'Figures'. The analysis is organized by the figures that it was used to generate. The input data for these analysis are either found in the output folders within 'Processing' or from the raw PCR data in the folder 'PCRdata'. The metadata files used in the analysis are in 'METAdata'. All this code can be run from this repository to reproduce any of the figures.
