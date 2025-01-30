@@ -1,4 +1,4 @@
-# RumenCampylobacter2023
+# RumenCampylobacter2022
 This repository is for the analysis code from the Strachan et al. 2023 paper "Differential carbon utilization enables co-existence of recently speciated Campylobacteraceae in the cow rumen epithelial microbiome"
 
 ## Statistical analysis and figure generation
